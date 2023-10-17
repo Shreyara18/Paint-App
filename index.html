@@ -1,0 +1,115 @@
+<!DOCTYPE html>	
+<html>	
+<head>	
+  <title>Simple Paint App</title>	
+  <style>	
+    body {	
+      display: flex;	
+      justify-content: center;	
+      align-items: center;	
+      height: 100%;	
+    }	
+    	
+    #container {	
+      text-align: center;	
+    }	
+    canvas {	
+      border: 10px solid black;	
+      margin: 0 auto;	
+      display: block;	
+    }	
+    #message {	
+      margin-top: 10px;	
+    }	
+    #resetButton {	
+      font-size: 20px; 	
+      margin: 10px auto;	
+    }	
+    h1 {	
+      margin-bottom: 20px; 	
+      margin-top: 10px; 	
+    }	
+  </style>	
+</head>	
+<body>	
+  <div id="container">	
+    <h1>Simple Paint App</h1>	
+    <canvas id="paintCanvas" width="800" height="400"></canvas>	
+    <button id="resetButton"><b>Reset</b></button>	
+    <div id="message"></div>	
+  </div>	
+  <script>	
+    // Get the canvas element	
+    const canvas = document.getElementById('paintCanvas');	
+    const ctx = canvas.getContext('2d');	
+    // Set initial values	
+    let isDrawing = false;	
+    let lastX = 0;	
+    let lastY = 0;	
+    // Get the message element	
+    const messageElement = document.getElementById('message');	
+    // Event listeners	
+    canvas.addEventListener('mousedown', startDrawing);	
+    canvas.addEventListener('mousemove', draw);	
+    canvas.addEventListener('mouseup', stopDrawing);	
+    canvas.addEventListener('mouseout', stopDrawing);	
+    canvas.addEventListener('click', checkCircle);	
+    canvas.addEventListener('dblclick', deleteCircle);	
+    // Reset button click event	
+    const resetButton = document.getElementById('resetButton');	
+    resetButton.addEventListener('click', resetCanvas);	
+    // Start drawing	
+    function startDrawing(e) {	
+      isDrawing = true;	
+      [lastX, lastY] = [e.offsetX, e.offsetY];	
+    }	
+    // Draw circles	
+    function draw(e) {	
+      if (!isDrawing) return;	
+      const [x, y] = [e.offsetX, e.offsetY];	
+      const radius = Math.sqrt((x - lastX) * 2 + (y - lastY) * 2);	
+      const color = getRandomColor();	
+      ctx.fillStyle = color;	
+      ctx.beginPath();	
+      ctx.arc(lastX, lastY, radius, 0, Math.PI * 2);	
+      ctx.closePath();	
+      ctx.fill();	
+    }	
+    // Stop drawing	
+    function stopDrawing() {	
+      isDrawing = false;	
+    }	
+    // Check if there is a circle below the cursor	
+    function checkCircle(e) {	
+      const [x, y] = [e.offsetX, e.offsetY];	
+      const pixel = ctx.getImageData(x, y, 1, 1).data;	
+      const alpha = pixel[3];	
+      const message = alpha > 0 ? 'Hit' : 'Miss';	
+      messageElement.textContent = message;	
+    }	
+    // Delete the circle on double click	
+    function deleteCircle(e) {	
+      const [x, y] = [e.offsetX, e.offsetY];	
+      const pixel = ctx.getImageData(x, y, 1, 1).data;	
+      const alpha = pixel[3];	
+      if (alpha > 0) {	
+        ctx.clearRect(x - pixel[0], y - pixel[1], pixel[0] * 2, pixel[1] * 2);	
+      }	
+    }	
+    // Reset the canvas	
+    function resetCanvas() {	
+      ctx.clearRect(0, 0, canvas.width, canvas.height);	
+      messageElement.textContent = '';	
+    }	
+    // Generate a random color	
+    function getRandomColor() {	
+      const letters = '0123456789ABCDEF';	
+      let color = '#';	
+      for (let i = 0; i < 6; i++) {	
+        color += letters[Math.floor(Math.random() * 16)];	
+      }	
+      return color;	
+    }	
+  </script>	
+</body>	
+</html>
